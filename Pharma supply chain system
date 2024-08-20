@@ -1,0 +1,135 @@
+import hashlib
+import json
+from datetime import datetime
+from getpass import getpass
+pharma_supply_chain = []
+users = {"admin": "adminpass"}
+class SmartContract:
+    def __init__(self, drug_id, manufacturer, distributor, pharmacy, consumer):
+        self.contract_id = hashlib.sha256(f"{drug_id}{datetime.now()}".encode()).hexdigest()
+        self.drug_id = drug_id
+        self.manufacturer = manufacturer
+        self.distributor = distributor
+        self.pharmacy = pharmacy
+        self.consumer = consumer
+        self.status = "Created"
+        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.transaction_history = []
+    def update_status(self, new_status, user):
+        self.status = new_status
+        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.transaction_history.append({
+            "status": new_status,
+            "user": user,
+            "timestamp": self.timestamp
+        })
+
+    def verify_drug(self, current_holder):
+        if current_holder in [self.manufacturer, self.distributor, self.pharmacy, self.consumer]:
+            return True
+        return False
+
+def register_user(username, password):
+    users[username] = password
+    print(f"User {username} registered successfully!")
+
+def authenticate_user():
+    username = input("Enter your username: ")
+    password = getpass("Enter your password: ")
+    if username in users and users[username] == password:
+        print("Authentication successful!")
+        return username
+    else:
+        print("Authentication failed!")
+        return None
+
+def create_smart_contract(username):
+    drug_id = input("Enter Drug ID: ")
+    manufacturer = input("Enter Manufacturer Name: ")
+    distributor = input("Enter Distributor Name: ")
+    pharmacy = input("Enter Pharmacy Name: ")
+    consumer = input("Enter Consumer Name: ")
+
+    contract = SmartContract(drug_id, manufacturer, distributor, pharmacy, consumer)
+    pharma_supply_chain.append(contract)
+    print(f"Smart contract {contract.contract_id} created successfully by {username}!")
+
+def update_contract_status(username):
+    contract_id = input("Enter Contract ID: ")
+    contract = next((c for c in pharma_supply_chain if c.contract_id == contract_id), None)
+    
+    if contract:
+        if contract.verify_drug(username):
+            new_status = input("Enter new status (e.g., 'In Transit', 'Delivered'): ")
+            contract.update_status(new_status, username)
+            print(f"Contract {contract.contract_id} status updated to {new_status} by {username}.")
+        else:
+            print(f"User {username} does not have permission to update this contract.")
+    else:
+        print("Contract not found.")
+
+def view_contract():
+    contract_id = input("Enter Contract ID: ")
+    contract = next((c for c in pharma_supply_chain if c.contract_id == contract_id), None)
+
+    if contract:
+        print(json.dumps(contract.__dict__, indent=4))
+    else:
+        print("Contract not found.")
+
+def main():
+    print("Welcome to the Pharma Supply Chain System")
+    
+    while True:
+        print("\nMenu:")
+        print("1. Register User")
+        print("2. Authenticate User")
+        print("3. Create Smart Contract")
+        print("4. Update Contract Status")
+        print("5. View Contract")
+        print("6. Exit")
+        
+        choice = int(input("Enter your choice: "))
+        
+        if choice == 1:
+            username = input("Enter username: ")
+            password = getpass("Enter password: ")
+            register_user(username, password)
+        
+        elif choice == 2:
+            username = authenticate_user()
+            if username:
+                while True:
+                    print("\nAuthenticated Menu:")
+                    print("1. Create Smart Contract")
+                    print("2. Update Contract Status")
+                    print("3. View Contract")
+                    print("4. Logout")
+                    
+                    auth_choice = int(input("Enter your choice: "))
+                    
+                    if auth_choice == 1:
+                        create_smart_contract(username)
+                    
+                    elif auth_choice == 2:
+                        update_contract_status(username)
+                    
+                    elif auth_choice == 3:
+                        view_contract()
+                    
+                    elif auth_choice == 4:
+                        print(f"User {username} logged out.")
+                        break
+                    
+                    else:
+                        print("Invalid choice. Please try again.")
+        
+        elif choice == 6:
+            print("Exiting the Pharma Supply Chain System.")
+            break
+        
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
