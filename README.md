@@ -1,1 +1,2 @@
-# Catalog--hackathon-3
+#Catalog-hackathon-3
+This project is a console-based application that simulates a Pharma Supply Chain System using Smart Contracts. It addresses the challenges faced by the pharmaceutical industry, such as counterfeiting, diversion, and theft, by providing a secure, transparent, and immutable record of every transaction in the supply chain. The system is implemented in Python and is designed to be simple yet powerful, allowing users to manage the lifecycle of pharmaceutical drugs from manufacturing to consumption.
